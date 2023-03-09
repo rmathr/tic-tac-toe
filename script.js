@@ -4,44 +4,64 @@ function createElementWithClass(type, className){
     return element
 }
 
+const DOMinteract = (function(){
+    const userText = document.getElementById('userText')
+    const resetGameBoard = document.getElementById('resetGameBoard')
+    const gameBoard = document.getElementById('gameBoard')
+    return { userText, resetGameBoard, gameBoard }
+})()
+
+
 const Gameboard = (function(){
     const gameBoard = document.getElementById('gameBoard')
     const rows = 3
     const columns = 3
     const board = []
-    for (let i = 0; i < rows*columns; i++){
-        board[i] = createElementWithClass('button', 'cell')
-        board[i].id = `button${i}`
-        board[i].value = 0
-        board[i].textContent = `${board[i].value}`
-        gameBoard.appendChild(board[i])
+
+    const render = function(){
+        for (let i = 0; i < rows*columns; i++){
+            board[i] = createElementWithClass('button', 'cell')
+            board[i].id = `button${i}`
+            board[i].value = 0
+            board[i].textContent = `${board[i].value}`
+            DOMinteract.gameBoard.appendChild(board[i])
+        }
     }
+    render()
     const getBoard = () => board
-    return { getBoard, gameBoard } 
+    return { getBoard, gameBoard, render } 
 })()
 
 const changeValue = (function (){
     let value = 0;
-    const board = Gameboard.gameBoard
-    board.addEventListener('click', handleClick, false)
+    let result = false
+     
+    const resetBoard = (function(){
+        DOMinteract.resetGameBoard.addEventListener('click', e=>{
+            e.preventDefault()
+            Gameboard.getBoard().forEach(e => e.remove());
+            Gameboard.render()
+            DOMinteract.userText.textContent = ''
+        })
+    })()
+
+    DOMinteract.gameBoard.addEventListener('click', handleClick, false)
     function handleClick(e) {
         const { nodeName } = e.target;
         if (nodeName === 'BUTTON') {
-            if(e.target.value === '0'){
-                value = roundSwitch.getActivePlayer().value
-                e.target.value = `${value}`
-                e.target.textContent = `${value}`
-                console.log(e.target.value);
-                roundSwitch.switchPlayerTurn()
+            if(e.target.value === '0' && !result){
+                    value = roundSwitch.getActivePlayer().value
+                    e.target.value = `${value}`
+                    e.target.textContent = `${value}`
+                    console.log(e.target.value);
+                    roundSwitch.switchPlayerTurn()
+                    result = getWinner()
             }
         }
-      }
-    
+      } 
 })()
 
-
 const roundSwitch = (function (){
-    const board = Gameboard.getBoard()
     const players = [
         {
             name: "Player One",
@@ -63,93 +83,47 @@ const roundSwitch = (function (){
 })()
 
 
+const getWinner = function(){
+    const board = Gameboard.getBoard()
+    const players = roundSwitch.players
 
+    const Winner = function(cellValue){
+    return players.filter(player => player.value == cellValue).map(player => player.name)
+    }
 
-                                                                                      
-
-
-
-
-// function Gameboard() {
-//     const rows = 3
-//     const columns = 3
-//     const board = [...Array(rows)].map(_=>Array(columns).fill(Cell()))
-//     const board = [...Array(rows)].map(_=>Array(columns))
-//     const getBoard = () => board;
-
-//     const dropToken = (column, player) => {
-//         // Our board's outermost array represents the row,
-//         // so we need to loop through the rows, starting at row 0,
-//         // find all the rows that don't have a token, then take the
-//         // last one, which will represent the bottom-most empty cell
-//         const availableCells = board.filter((row) => row[column].getValue() === 0).map(row => row[column]);
-    
-//         // If no cells make it through the filter, 
-//         // the move is invalid. Stop execution.,
-        
-//         if (!availableCells.length) return;
-    
-//         // Otherwise, I have a valid cell, the last one in the filtered array
-//         const lowestRow = availableCells.length - 1;
-//         board[lowestRow][column].addToken(player);
-//       };
-//  return getBoard
-// }
-
-// function Cell(){
-//     let value = 0
-//     const addValue = (player) => {value = player}
-//     const getValue = () => value
-//     return { addValue, getValue }
-// }
-
-function GameController(
-    playerOneName = "Player One",
-    playerTwoName = "Player Two"
-  ) {
-    const board = Gameboard();
-  
-    const players = [
-      {
-        name: playerOneName,
-        token: 1
-      },
-      {
-        name: playerTwoName,
-        token: 2
-      }
-    ];
-  
-    let activePlayer = players[0];
-  
-    const switchPlayerTurn = () => {
-      activePlayer = activePlayer === players[0] ? players[1] : players[0];
-    };
-    const getActivePlayer = () => activePlayer;
-  
-    const printNewRound = () => {
-      board.printBoard();
-      console.log(`${getActivePlayer().name}'s turn.`);
-    };
-  
-    const playRound = (column) => {
-      console.log(
-        `Dropping ${getActivePlayer().name}'s token into column ${column}...`
-      );
-      board.dropToken(column, getActivePlayer().token);
-  
-      /*  This is where we would check for a winner and handle that logic,
-          such as a win message. */
-  
-      switchPlayerTurn();
-      printNewRound();
-    };
-  
-    printNewRound();
-  
-    return {
-      playRound,
-      getActivePlayer,
-      getBoard: board.getBoard
-    };
-  }
+    const equal = function(a,b,c){
+        return a === b && b === c && a !== '0';
+    }
+    if(equal(board[0].value, board[1].value, board[2].value)){
+        DOMinteract.userText.textContent = `${Winner(board[0].value)}`
+        return true
+    }
+    if(equal(board[3].value, board[4].value, board[5].value)){
+        DOMinteract.userText.textContent = `${Winner(board[3].value)}`
+        return true
+    }
+    if(equal(board[6].value, board[7].value, board[8].value)){
+        DOMinteract.userText.textContent = `${Winner(board[6].value)}`
+        return true
+    }
+    if(equal(board[0].value, board[3].value, board[6].value)){
+        DOMinteract.userText.textContent = `${Winner(board[0].value)}`
+        return true
+    }
+    if(equal(board[1].value, board[4].value, board[7].value)){
+        DOMinteract.userText.textContent = `${Winner(board[1].value)}`
+        return true
+    }
+    if(equal(board[2].value, board[5].value, board[8].value)){
+        DOMinteract.userText.textContent = `${Winner(board[2].value)}`
+        return true
+    }
+    if(equal(board[0].value, board[4].value, board[8].value)){
+        DOMinteract.userText.textContent = `${Winner(board[0].value)}`
+        return true
+    }
+    if(equal(board[2].value, board[4].value, board[6].value)){
+        DOMinteract.userText.textContent = `${Winner(board[2].value)}`
+        return true
+    }
+}
