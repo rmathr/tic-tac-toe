@@ -8,7 +8,13 @@ const DOMinteract = (function(){
     const userText = document.getElementById('userText')
     const resetGameBoard = document.getElementById('resetGameBoard')
     const gameBoard = document.getElementById('gameBoard')
-    return { userText, resetGameBoard, gameBoard }
+    
+    const hookDOMelement = function (idName){
+        const elem = document.getElementById(`${idName}`)
+        return elem
+    }
+
+    return { userText, resetGameBoard, gameBoard, hookDOMelement }
 })()
 
 
@@ -48,6 +54,7 @@ const changeValue = (function (){
     })()
 
     DOMinteract.gameBoard.addEventListener('click', handleClick, false)
+    
     function handleClick(e) {
         const { nodeName } = e.target;
         if (nodeName === 'BUTTON') {
@@ -134,3 +141,20 @@ const getWinner = function(){
         return true
     }
 }
+
+const automaticPlayController = function(){
+    const board = Gameboard.getBoard()
+    const values = []
+    for(let i = 0; i < board.length; i++){
+        values[i] = {
+                        ref: i,
+                        value: board[i].value,
+                        id: board[i].id
+                    }
+    }
+    
+    const test = DOMinteract.hookDOMelement('button1')
+    
+    return values[0].id
+}
+
