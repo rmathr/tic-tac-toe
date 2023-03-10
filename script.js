@@ -42,6 +42,8 @@ const changeValue = (function (){
             Gameboard.getBoard().forEach(e => e.remove());
             Gameboard.render()
             DOMinteract.userText.textContent = ''
+            roundSwitch.resetActivePlayer()
+            result = false
         })
     })()
 
@@ -74,12 +76,17 @@ const roundSwitch = (function (){
     ]
     let activePlayer = players[0]
     
+    const resetActivePlayer = function(){
+        activePlayer = players[0]
+        return activePlayer
+    }
+    
     const switchPlayerTurn = function(){
         activePlayer = activePlayer === players[0] ? players[1] : players[0]
     }
     const getActivePlayer = () => activePlayer
 
-    return { players, switchPlayerTurn, getActivePlayer }
+    return { players, switchPlayerTurn, getActivePlayer, resetActivePlayer }
 })()
 
 
