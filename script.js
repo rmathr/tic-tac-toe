@@ -17,7 +17,6 @@ const DOMinteract = (function(){
     return { userText, resetGameBoard, gameBoard, hookDOMelement }
 })()
 
-
 const Gameboard = (function(){
     const gameBoard = document.getElementById('gameBoard')
     const rows = 3
@@ -29,13 +28,25 @@ const Gameboard = (function(){
             board[i] = createElementWithClass('button', 'cell')
             board[i].id = `button${i}`
             board[i].value = 0
-            board[i].textContent = `${board[i].value}`
+            board[i].textContent = `${board[i].value == 0? '': board[i].value}`
             DOMinteract.gameBoard.appendChild(board[i])
         }
     }
     render()
+
+    const getAvailableCells = function(){
+        const values = []
+        for(let i = 0; i < board.length; i++){
+            values[i] = {
+                            value: board[i].value,
+                            id: board[i].id
+                        }
+            return values
+        }
+    }
+
     const getBoard = () => board
-    return { getBoard, gameBoard, render } 
+    return { getBoard, gameBoard, render, getAvailableCells } 
 })()
 
 const changeValue = (function (){
@@ -61,10 +72,13 @@ const changeValue = (function (){
             if(e.target.value === '0' && !result){
                     value = roundSwitch.getActivePlayer().value
                     e.target.value = `${value}`
-                    e.target.textContent = `${value}`
+                    e.target.textContent = `${value == '1'? 'X': 'O'}`
                     console.log(e.target.value);
                     roundSwitch.switchPlayerTurn()
                     result = getWinner()
+                    if (value == '1'){
+                        setTimeout( function() { automaticPlayController().executeAutomaticPlay(); }, 500); 
+                    }
             }
         }
       } 
@@ -101,6 +115,11 @@ const getWinner = function(){
     const board = Gameboard.getBoard()
     const players = roundSwitch.players
 
+    const values = [] 
+    for(let i = 0; i < board.length; i++){
+        values[i] = board[i].value 
+    }
+    
     const Winner = function(cellValue){
     return players.filter(player => player.value == cellValue).map(player => player.name)
     }
@@ -140,22 +159,32 @@ const getWinner = function(){
         DOMinteract.userText.textContent = `${Winner(board[2].value)}`
         return true
     }
+    if(values.filter(value => value == '0').length === 0){
+        DOMinteract.userText.textContent = "It's a draw!"
+        return true
+    }
 }
 
 const automaticPlayController = function(){
-    const board = Gameboard.getBoard()
-    const values = []
-    for(let i = 0; i < board.length; i++){
-        values[i] = {
-                        value: board[i].value,
-                        id: board[i].id
-                    }
-    }
-    const availableCells = values.filter(item => item.value == 0).map(cell => cell.id)
-    const cellPicked = Math.floor(Math.random()*availableCells.length)
-    const pickedID = DOMinteract.hookDOMelement(`${availableCells[cellPicked]}`)
-    pickedID.click()
     
-    return { availableCells, pickedID }
+    const automaticPlayer = function(){
+        const board = Gameboard.getBoard()
+        const values = []
+        for(let i = 0; i < board.length; i++){
+            values[i] = {
+                            value: board[i].value,
+                            id: board[i].id
+                        }
+        }
+        const availableCells = values.filter(item => item.value == 0).map(cell => cell.id)
+        const cellPicked = Math.floor(Math.random()*availableCells.length)
+        const pickedID = DOMinteract.hookDOMelement(`${availableCells[cellPicked]}`)
+        if(availableCells.length > 0){
+            pickedID.click()
+        }
+    }
+    const executeAutomaticPlay = () => automaticPlayer()
+
+    return { executeAutomaticPlay }
 }
 

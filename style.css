@@ -46,6 +46,7 @@ body{
 .cell{
     width: 100px;
     height: 100px;
+    font-size: 4rem;
 }
 
 .reset-game-board {
