@@ -147,14 +147,15 @@ const automaticPlayController = function(){
     const values = []
     for(let i = 0; i < board.length; i++){
         values[i] = {
-                        ref: i,
                         value: board[i].value,
                         id: board[i].id
                     }
     }
+    const availableCells = values.filter(item => item.value == 0).map(cell => cell.id)
+    const cellPicked = Math.floor(Math.random()*availableCells.length)
+    const pickedID = DOMinteract.hookDOMelement(`${availableCells[cellPicked]}`)
+    pickedID.click()
     
-    const test = DOMinteract.hookDOMelement('button1')
-    
-    return values[0].id
+    return { availableCells, pickedID }
 }
 
