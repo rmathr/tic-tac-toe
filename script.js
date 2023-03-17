@@ -60,9 +60,25 @@ const Gameboard = (function(){
 
     const getIndexes = () => getAvailableCellsIndex()
 
-    const getBoardValues = () => getAvailableCells().map(item => item.value)
+    const getBoardValues = function() {
+        const availableBoard = []
+        const availableCells = getAvailableCells()
+        for(let i = 0; i < availableCells.length; i++){
+            if(availableCells[i].value != 0){
+                availableBoard[i] = availableCells[i].value
+            } else{
+                availableBoard[i] = availableCells[i].ref
+            }
+        }
+        return availableBoard
+    } 
 
-    return { getBoard, gameBoard, render, getAvailableBoard, getIndexes, getBoardValues } 
+    const getAllEmptyCellsIndex = function(currentBoard){
+        return currentBoard.filter(i => i != 'X' && i != 'O' )
+    }
+    const getEmptyCells = (currentBoard) => getAllEmptyCellsIndex(currentBoard)
+    // getAvailableCells().map(item => item.value)
+    return { getBoard, gameBoard, render, getAvailableBoard, getIndexes, getBoardValues, getEmptyCells } 
 })()
 
 const changeValue = (function (){
@@ -88,11 +104,12 @@ const changeValue = (function (){
             if(e.target.value === '0' && !result){
                     value = roundSwitch.getActivePlayer().value
                     e.target.value = `${value}`
-                    e.target.textContent = `${value == '1'? 'X': 'O'}`
+                    e.target.textContent = `${value}`
+                    // e.target.textContent = `${value == '1'? 'X': 'O'}`
                     console.log(e.target.value)
                     roundSwitch.switchPlayerTurn()
-                    result = getWinner(e.target.value)
-                    if (value == '1'){
+                    result = getWinner(Gameboard.getBoardValues(), e.target.value)
+                    if (value == 'X'){
                         setTimeout( function() { automaticPlayController().executeAutomaticPlay(); }, 500); 
                     }
             }
@@ -104,11 +121,11 @@ const roundSwitch = (function (){
     const players = [
         {
             name: "Player One",
-            value: 1
+            value: 'X'
         },
         {
             name: "Player Two",
-            value: 2
+            value: 'O'
         }
     ]
     let activePlayer = players[0]
@@ -127,111 +144,112 @@ const roundSwitch = (function (){
 })()
 
 
-const getWinner = function(playerValue){
-    const board = Gameboard.getBoard()
+const getWinner = function(currentBoard, playerValue){
+   
     const players = roundSwitch.players
 
     const values = [] 
-    for(let i = 0; i < board.length; i++){
-        values[i] = board[i].value 
+    for(let i = 0; i < currentBoard.length; i++){
+        values[i] = currentBoard[i].value 
     }
     
     const Winner = function(cellValue){
     return players.filter(player => player.value == cellValue).map(player => player.name)
     }
 
-    if((board[0].value == playerValue && board[1].value == playerValue && board[2].value == playerValue)||
-        (board[3].value == playerValue && board[4].value == playerValue && board[5].value == playerValue)||
-        (board[6].value == playerValue && board[7].value == playerValue && board[8].value == playerValue)||
-        (board[0].value == playerValue && board[3].value == playerValue && board[6].value == playerValue)||
-        (board[1].value == playerValue && board[4].value == playerValue && board[7].value == playerValue)||
-        (board[2].value == playerValue && board[5].value == playerValue && board[8].value == playerValue)||
-        (board[0].value == playerValue && board[4].value == playerValue && board[8].value == playerValue)||
-        (board[2].value == playerValue && board[4].value == playerValue && board[6].value == playerValue)){
-        DOMinteract.userText.textContent = `${Winner(playerValue)}`
+    if((currentBoard[0] == playerValue && currentBoard[1] == playerValue && currentBoard[2] == playerValue)||
+        (currentBoard[3] == playerValue && currentBoard[4] == playerValue && currentBoard[5] == playerValue)||
+        (currentBoard[6] == playerValue && currentBoard[7] == playerValue && currentBoard[8] == playerValue)||
+        (currentBoard[0] == playerValue && currentBoard[3] == playerValue && currentBoard[6] == playerValue)||
+        (currentBoard[1] == playerValue && currentBoard[4] == playerValue && currentBoard[7] == playerValue)||
+        (currentBoard[2] == playerValue && currentBoard[5] == playerValue && currentBoard[8] == playerValue)||
+        (currentBoard[0] == playerValue && currentBoard[4] == playerValue && currentBoard[8] == playerValue)||
+        (currentBoard[2] == playerValue && currentBoard[4] == playerValue && currentBoard[6] == playerValue)){
+        // DOMinteract.userText.textContent = `${Winner(playerValue)}`
         return true
     }
-    if(values.filter(value => value == '0').length === 0){
-        DOMinteract.userText.textContent = "It's a draw!"
-        return false
-    }
+    // if(values.filter(value => value == '0').length === 0){
+    //     DOMinteract.userText.textContent = "It's a draw!"
+    //     return false
+    // }
+    return false
 }
 
 const automaticPlayController = function(){
-    
+  
+    const automaticPlayer = function(){
+    const board = Gameboard.getAvailableBoard()
+    const values = Gameboard.getBoardValues()
+    const availableCells = Gameboard.getIndexes()
     const playerValues = roundSwitch.players.map(player => player.value)
 
-    const automaticPlayer = function(){
-        const values = Gameboard.getAvailableBoard()
-        const availableCells = values.filter(item => item.value == 0).map(cell => cell.id)
-        const cellPicked = Math.floor(Math.random()*availableCells.length)
-        const pickedID = DOMinteract.hookDOMelement(`${availableCells[cellPicked]}`)
-        if(availableCells.length > 0){
-            pickedID.click()
-        }
+    const cellPicked = minimax(values, 'O').index
+    console.log(cellPicked)
+    const pickedID = DOMinteract.hookDOMelement(`${board[cellPicked].id}`)
+    if(availableCells.length > 0){
+        pickedID.click()
     }
+}
+
+
     const executeAutomaticPlay = () => automaticPlayer()
-    
-    const bestPlayPossible = minimax(Gameboard.getBoardValues(), playerValues[2])
 
-    return { executeAutomaticPlay, bestPlayPossible }
+    return { executeAutomaticPlay }
 }
 
-const minimax = function(availableBoard, playerValue){
-    // const elem = []
-    // elem[0] = availableBoard[0]    
-    // return elem
-    const humanValue = roundSwitch.players[0].value
-    const aiValue = roundSwitch.players[1].value
 
-    const currentBoardValues = Gameboard.getBoardValues()
-    const availableCellsIndex = Gameboard.getIndexes()
+
+function minimax(availableBoard, playerValue){
+        const humanValue = 'X'
+        const aiValue = 'O'
     
-    if(getWinner(humanValue)){
-        return { score: -1 }
-    } else if(getWinner(aiValue)){
-        return { score: 1 }
-    } else if(availableCellsIndex.length === 0){
-        return { score: 0 }
-    }
-
-
-
-    const testPlaysInfo = []
-    for(let i = 0; i < availableCellsIndex.length; i++){
-        const currentTestPlayInfo = {}
-        currentTestPlayInfo.index = currentBoardValues[availableCellsIndex[i]]
-        currentBoardValues[availableCellsIndex[i]] = playerValue
-        if(playerValue === aiValue){
-            const result = minimax(currentBoardValues, humanValue)
-            currentTestPlayInfo.score = result.score
+        let availableCellsIndex = Gameboard.getEmptyCells(availableBoard)
+        
+        if(getWinner(availableBoard, humanValue)){
+            return { score: -10 }
+        } else if(getWinner(availableBoard, aiValue)){
+            return { score: 10 }
+        } 
+        else if(availableCellsIndex.length === 0){
+            return { score: 0 }
+        }
+    
+        let testPlaysInfo = []
+    
+        for(let i = 0; i < availableCellsIndex.length; i++){
+            let currentTestPlayInfo = {}
+            currentTestPlayInfo.index = availableBoard[availableCellsIndex[i]]
+            availableBoard[availableCellsIndex[i]] = playerValue
+            
+            if(playerValue == aiValue){
+                let result = minimax(availableBoard, humanValue)
+                currentTestPlayInfo.score = result.score
+            } else {
+                let result = minimax(availableBoard, aiValue)
+                currentTestPlayInfo.score = result.score
+            }
+            availableBoard[availableCellsIndex[i]] = currentTestPlayInfo.index
+            testPlaysInfo.push(currentTestPlayInfo)
+        }
+        
+        let bestTestPlay
+        if(playerValue == aiValue){
+            let bestScore = -10000;
+            for(let i = 0; i < testPlaysInfo.length; i++){
+                if(testPlaysInfo[i].score > bestScore){
+                    bestScore = testPlaysInfo[i].score
+                    bestTestPlay = i
+                }
+            }
         } else {
-            const result = minimax(currentBoardValues, aiValue)
-            currentTestPlayInfo.score = result.score
-        }
-        currentBoardValues[availableCellsIndex[i]] = currentTestPlayInfo.index
-        testPlaysInfo.push(currentTestPlayInfo)
-    }
-    let bestTestPlay = null
-    if(playerValue === aiValue){
-        let bestScore = -Infinity;
-        for(let i = 0; i < testPlaysInfo.length; i++){
-            if(testPlaysInfo[i].score > bestScore){
-                bestScore = testPlaysInfo[i].score
-                bestTestPlay = i
+            let bestScore = 10000
+            for(let i = 0; i < testPlaysInfo.length; i++){
+                if(testPlaysInfo[i].score < bestScore){
+                    bestScore = testPlaysInfo[i].score
+                    bestTestPlay = i
+                }
             }
         }
-    } else {
-        let bestScore = Infinity
-        for(let i = 0; i < testPlaysInfo.length; i++){
-            if(testPlaysInfo[i].score < bestScore){
-                bestScore = testPlaysInfo[i].score
-                bestTestPlay = i
-            }
-        }
+        return testPlaysInfo[bestTestPlay]
     }
-    return testPlaysInfo[bestTestPlay]
-
-}
-
 
