@@ -108,7 +108,8 @@ const changeValue = (function (){
                     // e.target.textContent = `${value == '1'? 'X': 'O'}`
                     console.log(e.target.value)
                     roundSwitch.switchPlayerTurn()
-                    result = getWinner(Gameboard.getBoardValues(), e.target.value)
+                    result = handleWin.verifyWin(Gameboard.getBoardValues(), e.target.value)
+                    handleWin.defineWinner(e.target.value)
                     if (value == 'X'){
                         setTimeout( function() { automaticPlayController().executeAutomaticPlay(); }, 500); 
                     }
@@ -144,36 +145,48 @@ const roundSwitch = (function (){
 })()
 
 
-const getWinner = function(currentBoard, playerValue){
-   
-    const players = roundSwitch.players
+const handleWin = (function(){
+    const values = []
+    const verifyWin = function(currentBoard, playerValue){
+        for(let i = 0; i < currentBoard.length; i++){
+            values[i] = currentBoard[i].value 
+        }
+        if((currentBoard[0] == playerValue && currentBoard[1] == playerValue && currentBoard[2] == playerValue)||
+            (currentBoard[3] == playerValue && currentBoard[4] == playerValue && currentBoard[5] == playerValue)||
+            (currentBoard[6] == playerValue && currentBoard[7] == playerValue && currentBoard[8] == playerValue)||
+            (currentBoard[0] == playerValue && currentBoard[3] == playerValue && currentBoard[6] == playerValue)||
+            (currentBoard[1] == playerValue && currentBoard[4] == playerValue && currentBoard[7] == playerValue)||
+            (currentBoard[2] == playerValue && currentBoard[5] == playerValue && currentBoard[8] == playerValue)||
+            (currentBoard[0] == playerValue && currentBoard[4] == playerValue && currentBoard[8] == playerValue)||
+            (currentBoard[2] == playerValue && currentBoard[4] == playerValue && currentBoard[6] == playerValue)){
+            // DOMinteract.userText.textContent = `${Winner(playerValue)}`
+            return true
+        }
+        if(values.filter(value => value == '0').length === 0){
+            // DOMinteract.userText.textContent = "It's a draw!"
+            return false
+        }
+        return false
+    }
 
-    const values = [] 
-    for(let i = 0; i < currentBoard.length; i++){
-        values[i] = currentBoard[i].value 
-    }
-    
-    const Winner = function(cellValue){
-    return players.filter(player => player.value == cellValue).map(player => player.name)
-    }
+    const defineWinner = function(cellValue){
+        
+        
+        if(verifyWin(Gameboard.getBoardValues(), cellValue)){
+            const players = roundSwitch.players
+            DOMinteract.userText.textContent = `${players.filter(player => player.value == cellValue).map(player => player.name)}`  
+        }
+        else {
+            if(Gameboard.getIndexes().length === 0){
+                DOMinteract.userText.textContent = "It's a draw!"
+            }
+        }
+        }
 
-    if((currentBoard[0] == playerValue && currentBoard[1] == playerValue && currentBoard[2] == playerValue)||
-        (currentBoard[3] == playerValue && currentBoard[4] == playerValue && currentBoard[5] == playerValue)||
-        (currentBoard[6] == playerValue && currentBoard[7] == playerValue && currentBoard[8] == playerValue)||
-        (currentBoard[0] == playerValue && currentBoard[3] == playerValue && currentBoard[6] == playerValue)||
-        (currentBoard[1] == playerValue && currentBoard[4] == playerValue && currentBoard[7] == playerValue)||
-        (currentBoard[2] == playerValue && currentBoard[5] == playerValue && currentBoard[8] == playerValue)||
-        (currentBoard[0] == playerValue && currentBoard[4] == playerValue && currentBoard[8] == playerValue)||
-        (currentBoard[2] == playerValue && currentBoard[4] == playerValue && currentBoard[6] == playerValue)){
-        // DOMinteract.userText.textContent = `${Winner(playerValue)}`
-        return true
-    }
-    // if(values.filter(value => value == '0').length === 0){
-    //     DOMinteract.userText.textContent = "It's a draw!"
-    //     return false
-    // }
-    return false
-}
+    return { verifyWin, defineWinner }
+})()
+
+
 
 const automaticPlayController = function(){
   
@@ -181,15 +194,13 @@ const automaticPlayController = function(){
     const board = Gameboard.getAvailableBoard()
     const values = Gameboard.getBoardValues()
     const availableCells = Gameboard.getIndexes()
-    const playerValues = roundSwitch.players.map(player => player.value)
-
-    const cellPicked = minimax(values, 'O').index
-    console.log(cellPicked)
-    const pickedID = DOMinteract.hookDOMelement(`${board[cellPicked].id}`)
+    const cellPicked = minimax(values, roundSwitch.players[1].value).index
+    // console.log(cellPicked)
     if(availableCells.length > 0){
+        const pickedID = DOMinteract.hookDOMelement(`${board[cellPicked].id}`)
         pickedID.click()
     }
-}
+    }
 
 
     const executeAutomaticPlay = () => automaticPlayer()
@@ -205,9 +216,9 @@ function minimax(availableBoard, playerValue){
     
         let availableCellsIndex = Gameboard.getEmptyCells(availableBoard)
         
-        if(getWinner(availableBoard, humanValue)){
+        if(handleWin.verifyWin(availableBoard, humanValue)){
             return { score: -10 }
-        } else if(getWinner(availableBoard, aiValue)){
+        } else if(handleWin.verifyWin(availableBoard, aiValue)){
             return { score: 10 }
         } 
         else if(availableCellsIndex.length === 0){
