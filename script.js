@@ -8,23 +8,21 @@ const DOMinteract = (function(){
     const userText = document.getElementById('userText')
     const resetGameBoard = document.getElementById('resetGameBoard')
     const gameBoard = document.getElementById('gameBoard')
+    const aiDifficulty = document.getElementById('aiDifficulty')
     
     const hookDOMelement = function (idName){
         const elem = document.getElementById(`${idName}`)
         return elem
     }
 
-    return { userText, resetGameBoard, gameBoard, hookDOMelement }
+    return { userText, resetGameBoard, gameBoard, aiDifficulty, hookDOMelement }
 })()
 
 const Gameboard = (function(){
-    const gameBoard = document.getElementById('gameBoard')
-    const rows = 3
-    const columns = 3
     const board = []
 
     const render = function(){
-        for (let i = 0; i < rows*columns; i++){
+        for (let i = 0; i < 9; i++){
             board[i] = createElementWithClass('button', 'cell')
             board[i].id = `button${i}`
             board[i].value = 0
@@ -78,25 +76,25 @@ const Gameboard = (function(){
     }
     const getEmptyCells = (currentBoard) => getAllEmptyCellsIndex(currentBoard)
     // getAvailableCells().map(item => item.value)
-    return { getBoard, gameBoard, render, getAvailableBoard, getIndexes, getBoardValues, getEmptyCells } 
+    return { getBoard, render, getAvailableBoard, getIndexes, getBoardValues, getEmptyCells } 
 })()
 
 const changeValue = (function (){
     let value = '0';
     let result = false
      
-    const resetBoard = (function(){
-        DOMinteract.resetGameBoard.addEventListener('click', e=>{
-            e.preventDefault()
-            Gameboard.getBoard().forEach(e => e.remove());
-            Gameboard.render()
-            DOMinteract.userText.textContent = ''
-            roundSwitch.resetActivePlayer()
-            result = false
-        })
-    })()
-
     DOMinteract.gameBoard.addEventListener('click', handleClick, false)
+
+    DOMinteract.resetGameBoard.addEventListener('click', e=>{
+        e.preventDefault()
+        resetBoard()
+    })
+
+    DOMinteract.aiDifficulty.addEventListener('change', e =>{
+        e.preventDefault()    
+        resetBoard()
+    })
+
     
     function handleClick(e) {
         const { nodeName } = e.target;
@@ -117,6 +115,14 @@ const changeValue = (function (){
         }
       } 
 })()
+
+const resetBoard = function(){
+        Gameboard.getBoard().forEach(e => e.remove());
+        Gameboard.render()
+        DOMinteract.userText.textContent = ''
+        roundSwitch.resetActivePlayer()
+        result = false
+}
 
 const roundSwitch = (function (){
     const players = [
@@ -186,20 +192,53 @@ const handleWin = (function(){
     return { verifyWin, defineWinner }
 })()
 
+const handleDifficulty = (function (){
+
+    const defineNormalDifficulty = function(){
+        const board = Gameboard.getAvailableBoard()
+        const availableCells = board.filter(item => item.value == 0).map(cell => cell.id)
+        const cellPicked = Math.floor(Math.random() * availableCells.length)
+        const pickedID = DOMinteract.hookDOMelement(`${availableCells[cellPicked]}`)
+        if (availableCells.length > 0) {
+            pickedID.click()
+        }
+    }
+
+    const defineImpossibleDifficulty = function(){
+        const board = Gameboard.getAvailableBoard()
+        const values = Gameboard.getBoardValues()
+        const availableCells = Gameboard.getIndexes()
+        const cellPicked = minimax(values, roundSwitch.players[1].value).index
+        // console.log(cellPicked)
+        if(availableCells.length > 0){
+            const pickedID = DOMinteract.hookDOMelement(`${board[cellPicked].id}`)
+            pickedID.click()
+        }
+    }
+
+
+    const executeNormal = () => defineNormalDifficulty()
+
+    const executeImpossible = () => defineImpossibleDifficulty()
+
+    return { executeNormal, executeImpossible }
+})()
 
 
 const automaticPlayController = function(){
   
     const automaticPlayer = function(){
-    const board = Gameboard.getAvailableBoard()
-    const values = Gameboard.getBoardValues()
-    const availableCells = Gameboard.getIndexes()
-    const cellPicked = minimax(values, roundSwitch.players[1].value).index
-    // console.log(cellPicked)
-    if(availableCells.length > 0){
-        const pickedID = DOMinteract.hookDOMelement(`${board[cellPicked].id}`)
-        pickedID.click()
+    if(DOMinteract.aiDifficulty.value === 'normal'){
+        handleDifficulty.executeNormal()
     }
+
+    if(DOMinteract.aiDifficulty.value === 'impossible'){
+        handleDifficulty.executeImpossible()
+    }   
+    
+
+
+    
     }
 
 
@@ -207,6 +246,8 @@ const automaticPlayController = function(){
 
     return { executeAutomaticPlay }
 }
+
+
 
 
 

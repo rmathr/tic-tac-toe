@@ -12,6 +12,16 @@
     <div class="main-container">
         <header class="main-header"></header>
         <main class="main-content" id="mainContent">
+            <form action="#">
+                <label for="aiDifficulty">AI level:</label>
+                <select id="aiDifficulty" name="aiDifficulty">
+                  <option value="normal">Normal</option>
+                  <option value="hard">Hard</option>
+                  <option value="impossible">Impossible</option>
+                </select>
+              </form>
+
+
             <p class="user-text" id="userText"></p>
             <div class="game-board" id="gameBoard"></div>
             <button class="reset-game-board" id="resetGameBoard">Reset</button>
