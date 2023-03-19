@@ -104,6 +104,7 @@ const changeValue = (function (){
                     value = roundSwitch.getActivePlayer().value
                     e.target.value = `${value}`
                     e.target.textContent = `${value}`
+                    e.target.classList.add(`${roundSwitch.getActivePlayer().class}`)
                     // e.target.textContent = `${value == '1'? 'X': 'O'}`
                     console.log(e.target.value)
                     roundSwitch.switchPlayerTurn()
@@ -129,11 +130,13 @@ const roundSwitch = (function (){
     const players = [
         {
             name: "Player One",
-            value: 'X'
+            value: 'X',
+            class: 'x-cell'
         },
         {
             name: "Player Two",
-            value: 'O'
+            value: 'O',
+            class: 'o-cell'
         }
     ]
     let activePlayer = players[0]
@@ -194,10 +197,7 @@ const handleWin = (function(){
 })()
 
 const handleDifficulty = (function (){
-
-    
-
-    const defineNormalDifficulty = function(){
+    const defineEasyDifficulty = function(){
         const board = Gameboard.getAvailableBoard()
         const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
         const cellPicked = Math.floor(Math.random() * availableCells.length)
@@ -206,24 +206,20 @@ const handleDifficulty = (function (){
             pickedID.click()
         }
     }
-
-
-    const defineMediumDifficulty = function(){
+    const defineNormalDifficulty = function(){
         const board = Gameboard.getAvailableBoard()
         const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
         let cellPicked
         if(board.filter(item => item.value == '0').length === 8){
             cellPicked = handleFirstRoundLogic(board)
         }else {
-            cellPicked = Math.floor(Math.random() * availableCells.length)
+            cellPicked = Gameboard.getEmptyCells(Gameboard.getBoardValues())[Math.floor(Math.random() * availableCells.length)]
         }
         if (availableCells.length > 0) {
             DOMinteract.hookDOMelement(`${board[cellPicked].id}`).click()
         }
         return cellPicked
     }
-
-
     const defineHardDifficulty = function(){
         const humanValue = roundSwitch.players[0].value
         const board = Gameboard.getAvailableBoard()
@@ -251,8 +247,6 @@ const handleDifficulty = (function (){
             DOMinteract.hookDOMelement(`${board[cellPicked].id}`).click()
         }
     }
-
-
     const defineImpossibleDifficulty = function(){
         const board = Gameboard.getAvailableBoard()
         const values = Gameboard.getBoardValues()
@@ -265,17 +259,17 @@ const handleDifficulty = (function (){
         }
     }
 
-
+    const executeEasy = () => defineEasyDifficulty()
     const executeNormal = () => defineNormalDifficulty()
-    const executeMedium = () => defineMediumDifficulty()
     const executeHard = () => defineHardDifficulty()
     const executeImpossible = () => defineImpossibleDifficulty()
 
-    return { executeNormal, executeMedium, executeHard, executeImpossible }
+    return { executeEasy, executeNormal, executeHard, executeImpossible }
 })()
 
 
 function handleFirstRoundLogic(board){
+    const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
     if(board[0].value != '0' || board[2].value != '0' || board[6].value != '0' || board[8].value != '0'){
        return cellPicked = board[4].ref
     } else if(board[4].value != '0'){
@@ -297,11 +291,11 @@ function handleFirstRoundLogic(board){
 const automaticPlayController = function(){
   
     const automaticPlayer = function(){
+        if (DOMinteract.aiDifficulty.value === 'easy') {
+            handleDifficulty.executeEasy()
+        }
         if (DOMinteract.aiDifficulty.value === 'normal') {
             handleDifficulty.executeNormal()
-        }
-        if (DOMinteract.aiDifficulty.value === 'medium') {
-            handleDifficulty.executeMedium()
         }
         if (DOMinteract.aiDifficulty.value === 'hard') {
             handleDifficulty.executeHard()

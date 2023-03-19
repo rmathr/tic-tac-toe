@@ -49,6 +49,14 @@ body{
     font-size: 4rem;
 }
 
+.x-cell{
+    background-color: green;
+}
+
+.o-cell{
+    background-color: red;
+}
+
 .reset-game-board {
     margin-top: 24px;
 }
