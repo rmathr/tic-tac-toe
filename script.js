@@ -9,6 +9,7 @@ const DOMinteract = (function(){
     const resetGameBoard = document.getElementById('resetGameBoard')
     const gameBoard = document.getElementById('gameBoard')
     const aiDifficulty = document.getElementById('aiDifficulty')
+
     
     const hookDOMelement = function (idName){
         const elem = document.getElementById(`${idName}`)
@@ -25,7 +26,7 @@ const Gameboard = (function(){
         for (let i = 0; i < 9; i++){
             board[i] = createElementWithClass('button', 'cell')
             board[i].id = `button${i}`
-            board[i].value = 0
+            board[i].value = '0'
             board[i].textContent = `${board[i].value == 0? '': board[i].value}`
             DOMinteract.gameBoard.appendChild(board[i])
         }
@@ -62,7 +63,7 @@ const Gameboard = (function(){
         const availableBoard = []
         const availableCells = getAvailableCells()
         for(let i = 0; i < availableCells.length; i++){
-            if(availableCells[i].value != 0){
+            if(availableCells[i].value != '0'){
                 availableBoard[i] = availableCells[i].value
             } else{
                 availableBoard[i] = availableCells[i].ref
@@ -87,12 +88,12 @@ const changeValue = (function (){
 
     DOMinteract.resetGameBoard.addEventListener('click', e=>{
         e.preventDefault()
-        resetBoard()
+        result = resetBoard()
     })
 
     DOMinteract.aiDifficulty.addEventListener('change', e =>{
         e.preventDefault()    
-        resetBoard()
+        result = resetBoard()
     })
 
     
@@ -117,11 +118,11 @@ const changeValue = (function (){
 })()
 
 const resetBoard = function(){
-        Gameboard.getBoard().forEach(e => e.remove());
-        Gameboard.render()
-        DOMinteract.userText.textContent = ''
-        roundSwitch.resetActivePlayer()
-        result = false
+    Gameboard.getBoard().forEach(e => e.remove());
+    Gameboard.render()
+    DOMinteract.userText.textContent = ''
+    roundSwitch.resetActivePlayer()
+    return false
 }
 
 const roundSwitch = (function (){
@@ -194,15 +195,92 @@ const handleWin = (function(){
 
 const handleDifficulty = (function (){
 
+    
+
     const defineNormalDifficulty = function(){
         const board = Gameboard.getAvailableBoard()
-        const availableCells = board.filter(item => item.value == 0).map(cell => cell.id)
+        const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
         const cellPicked = Math.floor(Math.random() * availableCells.length)
         const pickedID = DOMinteract.hookDOMelement(`${availableCells[cellPicked]}`)
         if (availableCells.length > 0) {
             pickedID.click()
         }
     }
+
+
+    // const defineMediumDifficulty = function(){
+    //     const humanValue = roundSwitch.players[0].value
+    //     const board = Gameboard.getAvailableBoard()
+    //     const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
+    //     let cellPicked
+    //     if(board.filter(item => item.value == '0').length === 8){
+    //         if(board[0].value != '0' || board[2].value != '0' || board[6].value != '0' || board[8].value != '0'){
+    //             cellPicked = board[4].ref
+    //         } else if(board[4].value != '0'){
+    //             cellPicked = Math.floor(Math.random() * availableCells.length)
+    //         } else {
+    //             for(let x = 0; x < board.length; x++){
+    //                 if(board[x].value != '0'){
+    //                     cellPicked = x == 1 ? board[7].ref :
+    //                     x == 3 ? board[5].ref : 
+    //                     x == 5 ? board[3].ref :
+    //                     board[1].ref
+    //                 }
+    //             }
+    //         }  
+    //     }else {
+    //         cellPicked = Math.floor(Math.random() * availableCells.length)
+    //     }
+    //     if (availableCells.length > 0) {
+    //         DOMinteract.hookDOMelement(`${board[cellPicked].id}`).click()
+    //     }
+    //     return cellPicked
+    // }
+
+
+    const defineHardDifficulty = function(){
+        const humanValue = roundSwitch.players[0].value
+        const board = Gameboard.getAvailableBoard()
+        const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
+        let cellPicked
+        if(board.filter(item => item.value == '0').length === 8){
+            // cellPicked = defineMediumDifficulty()
+            if(board[0].value != '0' || board[2].value != '0' || board[6].value != '0' || board[8].value != '0'){
+                cellPicked = board[4].ref
+            } else if(board[4].value != '0'){
+                cellPicked = Math.floor(Math.random() * availableCells.length)
+            } else {
+                for(let x = 0; x < board.length; x++){
+                    if(board[x].value != '0'){
+                        cellPicked = x == 1 ? board[7].ref :
+                        x == 3 ? board[5].ref : 
+                        x == 5 ? board[3].ref :
+                        board[1].ref
+                    }
+                }
+            }  
+        } else {
+            const values = Gameboard.getBoardValues()
+            const indexes = Gameboard.getEmptyCells(values)
+            Loop1:
+            for(let i = 0; i < indexes.length; i++){
+                let newBoard = values
+                let valueHolder = newBoard[indexes[i]]
+                newBoard[indexes[i]] = humanValue
+                if(handleWin.verifyWin(newBoard, humanValue)){
+                    cellPicked = indexes[i]
+                    break Loop1
+                } 
+                cellPicked = indexes[Math.floor(Math.random() * availableCells.length)]
+                newBoard[indexes[i]] = valueHolder
+            }
+        }
+        if (availableCells.length > 0) {
+            const pickedID = DOMinteract.hookDOMelement(`${board[cellPicked].id}`)
+            pickedID.click()
+        }
+    }
+
 
     const defineImpossibleDifficulty = function(){
         const board = Gameboard.getAvailableBoard()
@@ -218,10 +296,11 @@ const handleDifficulty = (function (){
 
 
     const executeNormal = () => defineNormalDifficulty()
-
+    // const executeMedium = () => defineMediumDifficulty()
+    const executeHard = () => defineHardDifficulty()
     const executeImpossible = () => defineImpossibleDifficulty()
 
-    return { executeNormal, executeImpossible }
+    return { executeNormal, executeHard, executeImpossible }
 })()
 
 
@@ -230,6 +309,10 @@ const automaticPlayController = function(){
     const automaticPlayer = function(){
     if(DOMinteract.aiDifficulty.value === 'normal'){
         handleDifficulty.executeNormal()
+    }
+
+    if(DOMinteract.aiDifficulty.value === 'hard'){
+        handleDifficulty.executeHard()
     }
 
     if(DOMinteract.aiDifficulty.value === 'impossible'){
