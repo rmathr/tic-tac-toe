@@ -208,34 +208,20 @@ const handleDifficulty = (function (){
     }
 
 
-    // const defineMediumDifficulty = function(){
-    //     const humanValue = roundSwitch.players[0].value
-    //     const board = Gameboard.getAvailableBoard()
-    //     const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
-    //     let cellPicked
-    //     if(board.filter(item => item.value == '0').length === 8){
-    //         if(board[0].value != '0' || board[2].value != '0' || board[6].value != '0' || board[8].value != '0'){
-    //             cellPicked = board[4].ref
-    //         } else if(board[4].value != '0'){
-    //             cellPicked = Math.floor(Math.random() * availableCells.length)
-    //         } else {
-    //             for(let x = 0; x < board.length; x++){
-    //                 if(board[x].value != '0'){
-    //                     cellPicked = x == 1 ? board[7].ref :
-    //                     x == 3 ? board[5].ref : 
-    //                     x == 5 ? board[3].ref :
-    //                     board[1].ref
-    //                 }
-    //             }
-    //         }  
-    //     }else {
-    //         cellPicked = Math.floor(Math.random() * availableCells.length)
-    //     }
-    //     if (availableCells.length > 0) {
-    //         DOMinteract.hookDOMelement(`${board[cellPicked].id}`).click()
-    //     }
-    //     return cellPicked
-    // }
+    const defineMediumDifficulty = function(){
+        const board = Gameboard.getAvailableBoard()
+        const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
+        let cellPicked
+        if(board.filter(item => item.value == '0').length === 8){
+            cellPicked = handleFirstRoundLogic(board)
+        }else {
+            cellPicked = Math.floor(Math.random() * availableCells.length)
+        }
+        if (availableCells.length > 0) {
+            DOMinteract.hookDOMelement(`${board[cellPicked].id}`).click()
+        }
+        return cellPicked
+    }
 
 
     const defineHardDifficulty = function(){
@@ -244,40 +230,25 @@ const handleDifficulty = (function (){
         const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
         let cellPicked
         if(board.filter(item => item.value == '0').length === 8){
-            // cellPicked = defineMediumDifficulty()
-            if(board[0].value != '0' || board[2].value != '0' || board[6].value != '0' || board[8].value != '0'){
-                cellPicked = board[4].ref
-            } else if(board[4].value != '0'){
-                cellPicked = Math.floor(Math.random() * availableCells.length)
-            } else {
-                for(let x = 0; x < board.length; x++){
-                    if(board[x].value != '0'){
-                        cellPicked = x == 1 ? board[7].ref :
-                        x == 3 ? board[5].ref : 
-                        x == 5 ? board[3].ref :
-                        board[1].ref
-                    }
-                }
-            }  
+            cellPicked = handleFirstRoundLogic(board)
         } else {
             const values = Gameboard.getBoardValues()
             const indexes = Gameboard.getEmptyCells(values)
-            Loop1:
+            Loop:
             for(let i = 0; i < indexes.length; i++){
                 let newBoard = values
                 let valueHolder = newBoard[indexes[i]]
                 newBoard[indexes[i]] = humanValue
                 if(handleWin.verifyWin(newBoard, humanValue)){
                     cellPicked = indexes[i]
-                    break Loop1
+                    break Loop
                 } 
                 cellPicked = indexes[Math.floor(Math.random() * availableCells.length)]
                 newBoard[indexes[i]] = valueHolder
             }
         }
         if (availableCells.length > 0) {
-            const pickedID = DOMinteract.hookDOMelement(`${board[cellPicked].id}`)
-            pickedID.click()
+            DOMinteract.hookDOMelement(`${board[cellPicked].id}`).click()
         }
     }
 
@@ -296,43 +267,54 @@ const handleDifficulty = (function (){
 
 
     const executeNormal = () => defineNormalDifficulty()
-    // const executeMedium = () => defineMediumDifficulty()
+    const executeMedium = () => defineMediumDifficulty()
     const executeHard = () => defineHardDifficulty()
     const executeImpossible = () => defineImpossibleDifficulty()
 
-    return { executeNormal, executeHard, executeImpossible }
+    return { executeNormal, executeMedium, executeHard, executeImpossible }
 })()
+
+
+function handleFirstRoundLogic(board){
+    if(board[0].value != '0' || board[2].value != '0' || board[6].value != '0' || board[8].value != '0'){
+       return cellPicked = board[4].ref
+    } else if(board[4].value != '0'){
+        return cellPicked = Math.floor(Math.random() * availableCells.length)
+    } else {
+        for(let x = 0; x < board.length; x++){
+            if(board[x].value != '0'){
+               return cellPicked = x == 1 ? board[7].ref :
+                x == 3 ? board[5].ref : 
+                x == 5 ? board[3].ref :
+                board[1].ref
+            }
+        }
+    }  
+}
+
 
 
 const automaticPlayController = function(){
   
     const automaticPlayer = function(){
-    if(DOMinteract.aiDifficulty.value === 'normal'){
-        handleDifficulty.executeNormal()
+        if (DOMinteract.aiDifficulty.value === 'normal') {
+            handleDifficulty.executeNormal()
+        }
+        if (DOMinteract.aiDifficulty.value === 'medium') {
+            handleDifficulty.executeMedium()
+        }
+        if (DOMinteract.aiDifficulty.value === 'hard') {
+            handleDifficulty.executeHard()
+        }
+        if (DOMinteract.aiDifficulty.value === 'impossible') {
+            handleDifficulty.executeImpossible()
+        }   
     }
-
-    if(DOMinteract.aiDifficulty.value === 'hard'){
-        handleDifficulty.executeHard()
-    }
-
-    if(DOMinteract.aiDifficulty.value === 'impossible'){
-        handleDifficulty.executeImpossible()
-    }   
-    
-
-
-    
-    }
-
 
     const executeAutomaticPlay = () => automaticPlayer()
 
     return { executeAutomaticPlay }
 }
-
-
-
-
 
 function minimax(availableBoard, playerValue){
         const humanValue = 'X'
