@@ -5,29 +5,38 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
     <script src="script.js" defer></script>
     <title>Document</title>
 </head>
 <body>
     <div class="main-container">
-        <header class="main-header"></header>
+        <header class="main-header">
+            <p class="headear-text">Tic tac toe</p>
+        </header>
         <main class="main-content" id="mainContent">
-            <form action="#">
-                <label for="aiDifficulty">AI level:</label>
-                <select id="aiDifficulty" name="aiDifficulty">
-                  <option value="easy">Easy</option>
-                  <option value="normal">Normal</option>
-                  <option value="hard">Hard</option>
-                  <option value="impossible">Impossible</option>
-                </select>
-              </form>
+            
+                <form action="#" class="select-form">
+                    <label for="aiDifficulty">AI level</label>
+                    <select id="aiDifficulty" name="aiDifficulty">
+                      <option value="easy">Easy</option>
+                      <option value="normal">Normal</option>
+                      <option value="hard">Hard</option>
+                      <option value="impossible">Impossible</option>
+                    </select>
+                  </form>
+            
+            
 
 
             <p class="user-text" id="userText"></p>
             <div class="game-board" id="gameBoard"></div>
-            <button class="reset-game-board" id="resetGameBoard">Reset</button>
+            <button class="reset-game-board" id="resetGameBoard">Restart</button>
         </main>
-        <footer class="footer"></footer>
+        <footer class="footer">
+            <p>rmath ©</p>
+            <a href="https://github.com/rmathr" class="fa-brands fa-github"></a>
+        </footer>
     </div>
 
 </body>

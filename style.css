@@ -1,7 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Permanent+Marker&family=Roboto:wght@400;700&display=swap');
+
+
+:root{
+    --cell-size: 120px;
+    --border-radius: 5%;
+}
+
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
 }
 
 body{
@@ -9,6 +18,49 @@ body{
     /* height: auto; */
     height: 100%;
 }
+
+.select-form{
+    margin-top: 24px;
+}
+
+.select-form label{
+    margin-right: 12px;
+    color: #f5f1f2;
+
+}
+
+select {
+    /* Reset */
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    border: 0;
+    outline: 0;
+    font: inherit;
+    /* Personalize */
+    width: 1.8*var(--cell-size);
+    height: 36px;
+    padding: 0 48px 0 12px;
+    background: url(https://upload.wikimedia.org/wikipedia/commons/9/9d/Caret_down_font_awesome_whitevariation.svg) no-repeat right 0.8em center/1.4em, linear-gradient(to left, rgba(255, 255, 255, 0.3) 3em, rgba(255, 255, 255, 0.2) 3em);
+    color: #f5f1f2;
+    border-radius: 0.25em;
+    box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    /* <option> colors */
+    /* Remove focus outline */
+    /* Remove IE arrow */
+}
+select option {
+    color: inherit;
+    background-color: #4f6e7d;
+}
+select:focus {
+    outline: none;
+}
+select::-ms-expand {
+    display: none;
+}
+
 
 .main-container{
     display: flex;
@@ -21,16 +73,19 @@ body{
 .main-content{
     height: 100%;
     width: 100%;
-    background-color: aquamarine;
+    background-color: #4f6e7d;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 .user-text{
+    margin-top: 24px;
     height: 50px;
     width: 50%;
     text-align: center;
+    color: #f5f1f2;
+    font-size: 20px;
 }
 
 .game-board{
@@ -39,36 +94,109 @@ body{
     height: fit-content;
     width: fit-content;
     display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
+    grid-template-columns: repeat(3, var(--cell-size));
+    grid-template-rows: repeat(3, var(--cell-size));
+    border-radius: var(--border-radius);
+    box-shadow: 0 15px 20px rgba(0,0,0,.6);
 }
 
 .cell{
-    width: 100px;
-    height: 100px;
-    font-size: 4rem;
+    width: var(--cell-size);
+    height: var(--cell-size);
+    font-size: calc(4*var(--cell-size)/5);
+    font-family: 'Nanum Pen Script', cursive;
+    border: none;
+    background-color: #ce9e62;
+}
+
+.cell:hover{
+    cursor: pointer;
+}
+
+.cell:nth-child(4), .cell:nth-child(5), .cell:nth-child(6)  {
+    border-top: 2px solid #f5f1f2;
+    border-bottom: 2px solid #f5f1f2;
+}
+
+.cell:nth-child(2), .cell:nth-child(5), .cell:nth-child(8)  {
+    border-left: 2px solid #f5f1f2;
+    border-right: 2px solid #f5f1f2;
+}
+
+.cell:nth-child(1) {
+    border-top-left-radius: var(--border-radius);
+}
+
+.cell:nth-child(3) {
+    border-top-right-radius: var(--border-radius);
+}
+
+.cell:nth-child(7) {
+    border-bottom-left-radius: var(--border-radius);
+}
+
+.cell:nth-child(9) {
+    border-bottom-right-radius: var(--border-radius);
 }
 
 .x-cell{
-    background-color: green;
+    background-color: rgba(206, 158, 98, 0.7);
 }
 
 .o-cell{
-    background-color: red;
+    background-color: rgba(206, 158, 98, 0.3);
 }
 
 .reset-game-board {
-    margin-top: 24px;
+    background-color: #728b97;
+    margin-top: 36px;
+    border: none;
+    padding: 6px 12px;
+    font-size: 18px;
+    color: #f5f1f2;
+    text-transform: uppercase;
 }
 
+.reset-game-board:hover{
+    transform: scale(1.1);
+    cursor: pointer;
+    background-color: rgba(114, 139, 151, 0.9);
+}
+
+
 .main-header{
-    height: 24px;
-    background-color: beige;
+    height: 64px;
+    /* background-color: #ce9e62; */
+    background-color: #4f6e7d;
     width: 100%;
+    font-family: 'Nanum Pen Script', cursive;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.headear-text{
+    font-family: 'Permanent Marker', cursive;
+    font-size: 42px;
+    padding: 0;
+    color: #f5f1f2;
+    text-transform: uppercase;
 }
 
 .footer{
-    height: 24px;
-    background-color: beige;
+    height: 36px;
+    /* background-color: #ce9e62; */
+    background-color: rgba(79, 110, 125, 0.9);
     width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #f5f1f2;
 }
+
+.fa-github {
+    margin: 8px;
+    color: #f5f1f2;
+    font-size: 14px;
+  }

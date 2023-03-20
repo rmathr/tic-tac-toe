@@ -111,7 +111,7 @@ const changeValue = (function (){
                     result = handleWin.verifyWin(Gameboard.getBoardValues(), e.target.value)
                     handleWin.defineWinner(e.target.value)
                     if (value == 'X'){
-                        setTimeout( function() { automaticPlayController().executeAutomaticPlay(); }, 500); 
+                        setTimeout( function() { automaticPlayController().executeAutomaticPlay(); }, 400); 
                     }
             }
         }
@@ -129,12 +129,12 @@ const resetBoard = function(){
 const roundSwitch = (function (){
     const players = [
         {
-            name: "Player One",
+            name: "You",
             value: 'X',
             class: 'x-cell'
         },
         {
-            name: "Player Two",
+            name: "Computer",
             value: 'O',
             class: 'o-cell'
         }
@@ -184,7 +184,7 @@ const handleWin = (function(){
         
         if(verifyWin(Gameboard.getBoardValues(), cellValue)){
             const players = roundSwitch.players
-            DOMinteract.userText.textContent = `${players.filter(player => player.value == cellValue).map(player => player.name)}`  
+            DOMinteract.userText.textContent = `Game over! ${players.filter(player => player.value == cellValue).map(player => player.name)} won!`  
         }
         else {
             if(Gameboard.getIndexes().length === 0){
