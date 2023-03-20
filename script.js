@@ -1,22 +1,21 @@
-function createElementWithClass(type, className){
-    const element = document.createElement(type)
-    element.classList.add(`${className}`)
-    return element
-}
-
 const DOMinteract = (function(){
     const userText = document.getElementById('userText')
     const resetGameBoard = document.getElementById('resetGameBoard')
     const gameBoard = document.getElementById('gameBoard')
     const aiDifficulty = document.getElementById('aiDifficulty')
 
-    
+    const createElementWithClass = function(type, className){
+        const element = document.createElement(type)
+        element.classList.add(`${className}`)
+        return element
+    }
+
     const hookDOMelement = function (idName){
         const elem = document.getElementById(`${idName}`)
         return elem
     }
 
-    return { userText, resetGameBoard, gameBoard, aiDifficulty, hookDOMelement }
+    return { userText, resetGameBoard, gameBoard, aiDifficulty, createElementWithClass, hookDOMelement }
 })()
 
 const Gameboard = (function(){
@@ -24,7 +23,7 @@ const Gameboard = (function(){
 
     const render = function(){
         for (let i = 0; i < 9; i++){
-            board[i] = createElementWithClass('button', 'cell')
+            board[i] = DOMinteract.createElementWithClass('button', 'cell')
             board[i].id = `button${i}`
             board[i].value = '0'
             board[i].textContent = `${board[i].value == 0? '': board[i].value}`
@@ -76,7 +75,7 @@ const Gameboard = (function(){
         return currentBoard.filter(i => i != 'X' && i != 'O' )
     }
     const getEmptyCells = (currentBoard) => getAllEmptyCellsIndex(currentBoard)
-    // getAvailableCells().map(item => item.value)
+    
     return { getBoard, render, getAvailableBoard, getIndexes, getBoardValues, getEmptyCells } 
 })()
 
@@ -105,8 +104,6 @@ const changeValue = (function (){
                     e.target.value = `${value}`
                     e.target.textContent = `${value}`
                     e.target.classList.add(`${roundSwitch.getActivePlayer().class}`)
-                    // e.target.textContent = `${value == '1'? 'X': 'O'}`
-                    console.log(e.target.value)
                     roundSwitch.switchPlayerTurn()
                     result = handleWin.verifyWin(Gameboard.getBoardValues(), e.target.value)
                     handleWin.defineWinner(e.target.value)
@@ -169,11 +166,9 @@ const handleWin = (function(){
             (currentBoard[2] == playerValue && currentBoard[5] == playerValue && currentBoard[8] == playerValue)||
             (currentBoard[0] == playerValue && currentBoard[4] == playerValue && currentBoard[8] == playerValue)||
             (currentBoard[2] == playerValue && currentBoard[4] == playerValue && currentBoard[6] == playerValue)){
-            // DOMinteract.userText.textContent = `${Winner(playerValue)}`
             return true
         }
         if(values.filter(value => value == '0').length === 0){
-            // DOMinteract.userText.textContent = "It's a draw!"
             return false
         }
         return false
@@ -252,11 +247,28 @@ const handleDifficulty = (function (){
         const values = Gameboard.getBoardValues()
         const availableCells = Gameboard.getIndexes()
         const cellPicked = minimax(values, roundSwitch.players[1].value).index
-        // console.log(cellPicked)
         if(availableCells.length > 0){
             const pickedID = DOMinteract.hookDOMelement(`${board[cellPicked].id}`)
             pickedID.click()
         }
+    }
+
+    function handleFirstRoundLogic(board){
+        const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
+        if(board[0].value != '0' || board[2].value != '0' || board[6].value != '0' || board[8].value != '0'){
+           return cellPicked = board[4].ref
+        } else if(board[4].value != '0'){
+            return cellPicked = Math.floor(Math.random() * availableCells.length)
+        } else {
+            for(let x = 0; x < board.length; x++){
+                if(board[x].value != '0'){
+                   return cellPicked = x == 1 ? board[7].ref :
+                    x == 3 ? board[5].ref : 
+                    x == 5 ? board[3].ref :
+                    board[1].ref
+                }
+            }
+        }  
     }
 
     const executeEasy = () => defineEasyDifficulty()
@@ -266,27 +278,6 @@ const handleDifficulty = (function (){
 
     return { executeEasy, executeNormal, executeHard, executeImpossible }
 })()
-
-
-function handleFirstRoundLogic(board){
-    const availableCells = board.filter(item => item.value == '0').map(cell => cell.id)
-    if(board[0].value != '0' || board[2].value != '0' || board[6].value != '0' || board[8].value != '0'){
-       return cellPicked = board[4].ref
-    } else if(board[4].value != '0'){
-        return cellPicked = Math.floor(Math.random() * availableCells.length)
-    } else {
-        for(let x = 0; x < board.length; x++){
-            if(board[x].value != '0'){
-               return cellPicked = x == 1 ? board[7].ref :
-                x == 3 ? board[5].ref : 
-                x == 5 ? board[3].ref :
-                board[1].ref
-            }
-        }
-    }  
-}
-
-
 
 const automaticPlayController = function(){
   
